@@ -1,8 +1,8 @@
 import HomePage from '@/components/HomePage.vue'
 import RegisterUser from '@/components/RegisterUser.vue'
 import LoginUser from '@/components/LoginUser.vue'
-import UpdateTrip from '@/components/UpdateTrip.vue'
-import ViewTrip from '@/components/ViewTrip.vue'
+import UpdateDelivery from '@/components/UpdateDelivery.vue'
+import ViewDelivery from '@/components/ViewDelivery.vue'
 import {createRouter, createWebHistory} from 'vue-router'
 
 const routes = [
@@ -22,14 +22,14 @@ const routes = [
     component: LoginUser
   },
   {
-    path: '/updatetrip',
-    name: 'updatetrip',
-    component: UpdateTrip
+    path: '/updatedelivery',
+    name: 'updatedelivery',
+    component: UpdateDelivery
   },
   {
-    path: '/viewtrip',
-    name: 'viewtrip',
-    component: ViewTrip,
+    path: '/viewdelivery',
+    name: 'viewdelivery',
+    component: ViewDelivery,
     props: true
   }
 ]
