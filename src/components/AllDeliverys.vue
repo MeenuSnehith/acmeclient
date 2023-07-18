@@ -23,13 +23,13 @@
                 <v-list-item-subtitle> {{ item.pickupCustomerName }} to {{ item.deliveryCustomerName }}</v-list-item-subtitle>
                 <v-list-item-subtitle>Pick Up: {{ item.pickupStreet }} - {{ item.pickupAvn }} &nbsp; Delivery: {{ item.deliveryStreet }} - {{ item.deliveryAvn }}</v-list-item-subtitle>
                 <template v-slot:append>
-                  <v-btn size="small" variant="tonal">
-                    <v-icon color="orange-darken-4" end> mdi-pencil  </v-icon>&nbsp;
+                  <v-btn size="small" variant="tonal" @click="openDelivery(item.id)">
+                    <v-icon color="orange-darken-4" end> mdi-open-in-new  </v-icon>&nbsp;
                     View
                   </v-btn>
                   &nbsp;
-                  <v-btn size="small" variant="tonal">
-                    <v-icon color="orange-darken-4" end> mdi-delete-empty </v-icon>&nbsp;
+                  <v-btn size="small" variant="tonal" @click="editDelivery(item.id)" v-show="this.$store.state.permission != '3'">
+                    <v-icon color="orange-darken-4" end> mdi-pencil </v-icon>&nbsp;
                     Edit
                   </v-btn>
                 </template>
@@ -55,8 +55,8 @@
 </template>
 
 <script>
-import ItinerarysService from '@/services/ItinerarysService'
 import DeliveryService from '@/services/DeliveryService'
+import router from '../router'
 
   export default {
     data: () => ({
@@ -65,17 +65,9 @@ import DeliveryService from '@/services/DeliveryService'
       loadingOverlay: false,
       editOverlay: false,
       diableOverlay:true,
-
-      createHtlIMG: "",
-      createHtl: "",
-      editHtlIMG: "",
-      editHtl: "",
-      editHtlID: "",
-      allHtl: [],
-      addHtlAry: [],
-      showHtl: [],
       lochtlOverlay: false,
       loadingMSG: "Loading...",
+      userPerms: "",
 
       deliverys: []
     }),
@@ -84,69 +76,25 @@ import DeliveryService from '@/services/DeliveryService'
       async getAllDeliverys(){
         await DeliveryService.getAllDeliverys().then((response)=>{
             response.data.forEach(element => {
-              this.deliverys.push(element)
+              if(this.userPerms == "3"){
+                if(element.orderTakenBy == "" || element.orderTakenBy == null){
+                  this.deliverys.push(element)
+                }
+              }else{
+                this.deliverys.push(element)
+              }
             });
             this.loadingOverlay = false
         })
       },
-      async createHotel(){
-        if(this.createHtl != "" && this.createHtlIMG != null){
-        this.loadingOverlay = true
-          await ItinerarysService.addHotel({
-            HotelName: this.createHtl,
-            ImageURL: this.createHtlIMG
-          }).then((response)=>{
-            console.log("create Location: " + response)
-            this.allHtl.push({
-              "id" : response.data.id,
-              "HotelName" : response.data.HotelName,
-              "ImageURL" : response.data.ImageURL
-            })
-            
-            this.addHtlAry.push({
-              "HotelName" : this.createHtl,
-              "ImageURL" : this.createHtlIMG
-            })
-            this.createHtl = ""
-            this.createHtlIMG = ""
-            
-            this.loadingOverlay = false
-          })
-        }
-          else{
-            this.showSnackles("Please Fill hotel name and Hoptel image URL to continue.")
-          }
+      openDelivery(id){
+        this.$store.commit('setviewDeliveryId', id)
+        router.push("/viewdelivery")
       },
-      editHotel(hot){
-        console.log(hot)
-        this.editHtl = hot.HotelName
-        this.editHtlIMG = hot.ImageURL
-        this.editHtlID = hot.id
-        this.editOverlay = !this.editOverlay
-      },
-      async deleteHotel(hot){
-        console.log(hot)
-        this.loadingOverlay = true
-        this.loadingMSG = "Deleting..."
-        var deleteHot = await ItinerarysService.deleteHotel(hot.id).then(()=> {
-          this.loadingOverlay = false
-          this.refreshAllTrips = !this.refreshAllTrips
-        })
-        console.log(deleteHot)
-      },
-      async updateHtl(){
-        console.log(this.editHtlID)
-        this.loadingOverlay = true
-        this.loadingMSG = "Updating..."
-        var uptHtl = await ItinerarysService.updateHotel(this.editHtlID, {
-          HotelName: this.editHtl,
-          ImageURL: this.editHtlIMG
-        }).then(() => {
-          this.editOverlay = !this.editOverlay
-          this.loadingOverlay = false
-          this.refreshAllTrips = !this.refreshAllTrips
-        })
-        console.log("updated: "+ uptHtl)
+      editDelivery(id){
+        console.log(id)
+        this.$store.commit('seteditDeliveryId', id)
+        router.push("/updatedelivery")
       }
     },
     beforeMount() {
@@ -157,6 +105,7 @@ import DeliveryService from '@/services/DeliveryService'
       refreshAllTrips: function(){
         this.loadingOverlay = true
         this.deliverys = []
+        this.userPerms = this.$store.state.permission
         this.getAllDeliverys()
       }
     }

@@ -19,6 +19,7 @@
             <v-text-field
               v-model="pupCustID"
               label="Customer ID"
+              v-show="false"
             ></v-text-field>
             <v-text-field
               v-model="pupCustStreet"
@@ -47,6 +48,7 @@
             <v-text-field
               v-model="dlyCustID"
               label="Customer ID"
+              v-show="false"
             ></v-text-field>
             <v-text-field
               v-model="dlyCustStreet"
