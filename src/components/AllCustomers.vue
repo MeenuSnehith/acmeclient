@@ -122,8 +122,8 @@ import CustomerService from '@/services/CustomerService'
         }
         catch(err){
           console.log(err)
-          console.log(err.response.data.error)
-          this.showError(err.response.data.error)
+          console.log(err.message)
+          this.showError(err.message)
         }
       },
       async addCustomer(){

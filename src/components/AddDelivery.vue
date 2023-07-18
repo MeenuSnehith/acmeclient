@@ -87,6 +87,7 @@
               size="large"
               variant="elevated"
               rounded="xl"
+              @click="getCalculatedDelivery()"
             >
               Calculate Route
             </v-btn>
@@ -99,9 +100,8 @@
               md="3"
             >
               <v-text-field
-              v-model="days"
-              label="Estimated delivery time"
-              type="datetime-local"
+              v-model="estMin"
+              label="Estimated delivery time - Minutes"
               disabled
             ></v-text-field>
             </v-col>
@@ -111,7 +111,7 @@
               md="3"
             >
               <v-text-field
-              v-model="nights"
+              v-model="estDistance"
               label="Estimated Price"
               disabled
             ></v-text-field>
@@ -121,7 +121,7 @@
               md="3"
             >
               <v-text-field
-              v-model="from"
+              v-model="pupRoute"
               label="Pickup route"
               disabled
             ></v-text-field>
@@ -131,7 +131,7 @@
               md="3"
             >
               <v-text-field
-              v-model="from"
+              v-model="dlyRoute"
               label="Delivery route"
               disabled
             ></v-text-field>
@@ -301,6 +301,17 @@ import DeliveryService from '@/services/DeliveryService'
       custStreet: "",
       custAvenue: "",
 
+      pupRoute: "",
+      pupDistance: 0,
+      dlyRoute: "",
+      dlyDistance: 0,
+      backDistance: 0,
+      estDistance: "",
+      estDateTime: "",
+      estMin: 0,
+
+      org: "C5",
+
       customers: []
     }),
 
@@ -321,8 +332,8 @@ import DeliveryService from '@/services/DeliveryService'
         }
         catch(err){
           console.log(err)
-          console.log(err.response.data.error)
-          this.showError(err.response.data.error)
+          console.log(err.message)
+          this.showError(err.message)
         }
       },
       addPickupCust(cust){
@@ -377,11 +388,16 @@ import DeliveryService from '@/services/DeliveryService'
               pickupCustomerId: this.pupCustID,
               pickupAvn: this.pupCustAvenue,
               pickupStreet: this.pupCustStreet,
+              pickupRoute: this.pupRoute,
               pickupTime: this.pickuptime.toString(),
               deliveryCustomerName: this.dlyCustName,
               deliveryCustomerId: this.dlyCustID,
               deliveryAvn: this.dlyCustAvenue,
               deliveryStreet: this.dlyCustStreet,
+              deliveryRoute: this.dlyRoute,
+              deliveryTime: this.estDateTime.toString(),
+              estimatedPrice: this.estDistance,
+              estMin: this.estMin,
               status: "1"
           }).then((response) => {
             console.log(response)
@@ -395,6 +411,81 @@ import DeliveryService from '@/services/DeliveryService'
               this.dlyCustID = ""
               this.dlyCustAvenue = ""
               this.dlyCustStreet = ""
+            }
+            this.loadingOverlay = false
+          })
+        }
+        catch(err){
+          console.log(err)
+          console.log(err.response.data.error)
+        }
+      },
+      getCalculatedDelivery(){
+        this.getPickUpRoute().then(()=> {
+          this.getDeliveryRoute().then(()=> {
+            this.getBackToOfficeRoute().then(()=> {
+              this.estDistance = (this.pupDistance + this.dlyDistance + this.backDistance) * 10
+              this.estMin = (this.pupDistance + this.dlyDistance) * 5 //5 mins per block to block
+              const tempDate = new Date(this.pickuptime)
+              this.estDateTime = new Date(tempDate.getTime() + this.estMin*60000)
+            })
+          })
+        })
+      },
+      async getPickUpRoute(){
+        this.loadingOverlay = true
+        console.log("start: " + this.org + ":: end" + this.pupCustStreet + this.pupCustAvenue)
+        try{
+          await DeliveryService.getShortestPath({
+              source: this.org,
+              destination: this.pupCustStreet + this.pupCustAvenue
+          }).then((response) => {
+            console.log(response)
+            if(response.statusText == "OK"){
+              this.pupRoute = response.data.shortestPath.path.toString()
+              this.pupDistance = response.data.shortestPath.distance
+              console.log("pick up route: " + response.data.shortestPath.path)
+            }
+            this.loadingOverlay = false
+          })
+        }
+        catch(err){
+          console.log(err)
+          console.log(err.response.data.error)
+        }
+      },
+      async getDeliveryRoute(){
+        this.loadingOverlay = true
+        try{
+          await DeliveryService.getShortestPath({
+              source: this.pupCustStreet + this.pupCustAvenue,
+              destination: this.dlyCustStreet + this.dlyCustAvenue
+          }).then((response) => {
+            console.log(response)
+            if(response.statusText == "OK"){
+              this.dlyRoute = response.data.shortestPath.path.toString()
+              this.dlyDistance = response.data.shortestPath.distance
+              console.log("pick up route: " + response.data.shortestPath.path)
+            }
+            this.loadingOverlay = false
+          })
+        }
+        catch(err){
+          console.log(err)
+          console.log(err.response.data.error)
+        }
+      },
+      async getBackToOfficeRoute(){
+        this.loadingOverlay = true
+        try{
+          await DeliveryService.getShortestPath({
+              source: this.dlyCustStreet + this.dlyCustAvenue,
+              destination: this.org
+          }).then((response) => {
+            console.log(response)
+            if(response.statusText == "OK"){
+              this.backDistance = response.data.shortestPath.distance
+              console.log("back to office route: " + response.data.shortestPath.path)
             }
             this.loadingOverlay = false
           })
