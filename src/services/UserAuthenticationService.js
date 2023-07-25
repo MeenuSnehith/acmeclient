@@ -8,7 +8,7 @@ export default{
         return Api().post('/login', credentials)
     },
     getAlUsers () {
-        return Api().get('/allUsers')
+        return Api().get('/users')
     },
     deleteUser (userID){
         return Api().delete('/user/' + userID)

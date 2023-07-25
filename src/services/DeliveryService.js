@@ -2,10 +2,10 @@ import Api from '@/services/Api'
 
 export default{
     getAllDeliverys () {
-        return Api().get('/allDeliverys')
+        return Api().get('/deliverys')
     },
     addDelivery (req) {
-        return Api().post('/addDelivery', req)
+        return Api().post('/delivery', req)
     },
     getlDeliveryByID (id) {
         return Api().get('/deliveryById/' + id)
@@ -16,10 +16,10 @@ export default{
     updateDelivery (req, id){
         return Api().put('/deliveryUpdate/'+ id, req)
     },
-    assignDelivery (req, id) {
-        return Api().put('/assignDelivery/'+ id, req)
-    },
     deleteDelivery (id) {
         return Api().delete('/delivery/'+ id)
+    },
+    getShortestPath (data) {
+        return Api().post('/shortestPath', data)
     }
 }
