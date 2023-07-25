@@ -12,7 +12,6 @@
       </v-row>
       <v-row>
         <v-col cols="12">
-          
           <v-card>
             <v-card-title class="text-h6">
               Package ID: {{deliveryID}}
@@ -128,6 +127,20 @@
               ></l-image-overlay>
               <l-polyline :lat-lngs="polyline.latlngs" :color="polyline.color"></l-polyline>
               <l-marker :lat-lng="markerLatLng" ></l-marker>
+              <l-circle
+                :lat-lng="circle.center"
+                :radius="circle.radius"
+                :color="circle.color"
+              >
+              <l-tooltip>Office </l-tooltip>
+              </l-circle>
+              <l-circle
+                :lat-lng="source.center"
+                :radius="source.radius"
+                :color="source.color"
+              >
+              <l-tooltip>Start</l-tooltip>
+              </l-circle>
             </l-map>
           </div>
         </v-col>
@@ -160,14 +173,16 @@
 <script>
 import DeliveryService from '@/services/DeliveryService'
 import "leaflet/dist/leaflet.css";
-import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leaflet";
+import { LMap, LImageOverlay, LPolyline, LMarker, LCircle, LTooltip } from "@vue-leaflet/vue-leaflet";
 
   export default {
     components: {
       LMap,
       LImageOverlay, 
       LPolyline, 
-      LMarker
+      LMarker, 
+      LCircle, 
+      LTooltip
     },
     data: () => ({
       loadingOverlay: false,
@@ -187,6 +202,7 @@ import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leafle
       deliveryAvenue: "",
       pickUpRoute: "",
       deliveryRoute: "",
+      backToRoute: "",
       pickUpTime: "",
       deliveryTime: "",
       estimatedCost: "",
@@ -200,12 +216,24 @@ import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leafle
       showStatusBtn: false,
       isBonus: "",
       timeElapsed: 0,
+
+      org: "C3",
       zoom: 6,
       polyline: {
         latlngs: [],
         color: 'green'
       },
-      markerLatLng: [0, 0]
+      markerLatLng: [0, 0],
+      circle: {
+        center: [1.55, -1.92],
+        radius: 20000,
+        color: 'red'
+      },
+      source: {
+        center: [1.55, -1.92],
+        radius: 20000,
+        color: 'blue'
+      }
     }),
 
     methods: {
@@ -225,6 +253,7 @@ import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leafle
           this.deliveryAvenue = this.delivery.deliveryAvn
           this.pickUpRoute = this.delivery.pickupRoute
           this.deliveryRoute = this.delivery.deliveryRoute
+          this.backToRoute = this.delivery.backToOfficeRoute
           this.estimatedCost = this.delivery.estimatedPrice
           this.estMin = this.delivery.estMin
           this.pickUpTime = this.dateFormatter(this.delivery.pickupTime)
@@ -257,6 +286,7 @@ import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leafle
           }
 
           if(this.status == 4){
+            this.backTOOfficeRouting()
             this.alertMsg = "This Delivery is completed in : " + this.timeElapsed + " Minute(s)"
           }
 
@@ -302,6 +332,7 @@ import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leafle
         });
 
         this.markerLatLng = this.mapPointsMapping(pickupARY[pickupARY.length-1])
+        this.source.center = this.mapPointsMapping(pickupARY[0])
       },
       deliveryRouting (){
         this.polyline = {
@@ -312,7 +343,22 @@ import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leafle
         pickupARY.forEach(element => {
           this.polyline.latlngs.push(this.mapPointsMapping(element))
         });
+        
         this.markerLatLng = this.mapPointsMapping(pickupARY[pickupARY.length-1])
+        this.source.center = this.mapPointsMapping(pickupARY[0])
+      },
+      backTOOfficeRouting (){
+        this.polyline = {
+          latlngs: [],
+          color: 'green' 
+        }
+        const pickupARY = this.backToRoute.split(",")
+        pickupARY.forEach(element => {
+          this.polyline.latlngs.push(this.mapPointsMapping(element))
+        });
+
+        this.markerLatLng = this.mapPointsMapping(pickupARY[pickupARY.length-1])
+        this.source.center = this.mapPointsMapping(pickupARY[0])
       },
       dateFormatter(date){
         if(date != null){
@@ -415,7 +461,7 @@ import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leafle
                 this.showStatusBtn = true
                 this.status = 3
                 this.loadingOverlay = false
-                this.refresPage = !this.refreshPage
+                this.refreshPage = !this.refreshPage
               })
             }
             else if(this.status == 3){
@@ -433,6 +479,7 @@ import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leafle
                 console.log(response)
                 this.showStatusBtn = false
                 this.status = 4
+                this.backTOOfficeRouting()
                 this.loadingOverlay = false
                 this.refreshPage = !this.refreshPage
               })
@@ -445,6 +492,17 @@ import { LMap, LImageOverlay, LPolyline, LMarker } from "@vue-leaflet/vue-leafle
         const minutes = Math.floor(this.countDown / 60);
         const extraSeconds = this.countDown % 60;
         this.countDownTimerView = minutes + ":" + (extraSeconds < 10 ? "0" + extraSeconds : extraSeconds)
+      },
+      status: function (){
+        if(this.status == 2){
+          this.pickUpRouting()
+        }
+        else if(this.status == 3){
+          this.deliveryRouting()
+        }
+        else if(this.status == 4){
+          this.backTOOfficeRouting()
+        }
       }
     },
     beforeMount() {
