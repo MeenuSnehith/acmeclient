@@ -13,3 +13,4 @@ export async function loadFonts () {
     },
   })
 }
+//v.4.3
