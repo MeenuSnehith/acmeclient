@@ -23,8 +23,12 @@
                 <v-list-item-subtitle> {{ item.pickupCustomerName }} to {{ item.deliveryCustomerName }}</v-list-item-subtitle>
                 <v-list-item-subtitle>Pick Up: {{ item.pickupStreet }} - {{ item.pickupAvn }} &nbsp; Delivery: {{ item.deliveryStreet }} - {{ item.deliveryAvn }}</v-list-item-subtitle>
                 <template v-slot:append>
+                  <v-icon color="red-darken-4" v-show="item.status == 1"> mdi-clipboard-text </v-icon>
+                    <v-icon color="yellow-darken-4" v-show="item.status == 2"> mdi-clipboard-check </v-icon>
+                    <v-icon color="blue-darken-4" v-show="item.status == 3"> mdi-truck-delivery </v-icon>
+                    <v-icon color="green-darken-4" v-show="item.status == 4"> mdi-check-circle </v-icon>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   <v-btn size="small" variant="tonal" @click="openDelivery(item.id)">
-                    <v-icon color="orange-darken-4" end> mdi-open-in-new  </v-icon>&nbsp;
+                    <v-icon color="orange-darken-4" end> mdi-open-in-new  </v-icon> &nbsp;
                     View
                   </v-btn>
                   &nbsp;
@@ -88,9 +92,6 @@ import router from '../router'
             this.loadingOverlay = false
         })
       },
-      openDelivery(id){
-        this.$store.commit('setviewDeliveryId', id)
-        router.push("/viewdelivery")
       },
       editDelivery(id){
         console.log(id)

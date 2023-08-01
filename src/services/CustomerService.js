@@ -5,7 +5,7 @@ export default{
         return Api().get('/customers')
     },
     addCustomer (req) {
-        return Api().post('/addCustomer', req)
+        return Api().post('/customer', req)
     },
     deleteCustomer (custID) {
         return Api().delete('/customer/'+custID)

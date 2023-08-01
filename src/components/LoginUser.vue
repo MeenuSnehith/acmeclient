@@ -116,7 +116,7 @@ import AuthenticationService from '@/services/UserAuthenticationService'
                   console.log(this.$store.state.username)
                   console.log(this.$store.state.permission)
                   console.log(this.$store.state.isUserLoggedIn)
-                  this.clearFields()
+                  //this.clearFields() 
                   this.snackbar = true
                   setTimeout(() => (router.push('/')), 1000)
                 }
@@ -125,7 +125,7 @@ import AuthenticationService from '@/services/UserAuthenticationService'
         }
         catch(err){
           console.log(err)
-          this.showError(err.response.data.error)
+          this.showError("Login Failed. Please check username and Password.")
           this.clearFields()
         }
       },

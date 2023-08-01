@@ -27,7 +27,7 @@
               {{UserName}}
             </v-btn>
             <v-btn
-              prepend-icon="mdi-account-circle"
+              prepend-icon="mdi-logout"
               @click="logout"
             >
               <template v-slot:prepend>

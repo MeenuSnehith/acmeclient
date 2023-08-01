@@ -5,7 +5,7 @@ export default{
         return Api().get('/deliverys')
     },
     addDelivery (req) {
-        return Api().post('/addDelivery', req)
+        return Api().post('/delivery', req)
     },
     getlDeliveryByID (id) {
         return Api().get('/deliveryById/' + id)
