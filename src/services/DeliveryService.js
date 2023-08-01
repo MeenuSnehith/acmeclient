@@ -21,5 +21,14 @@ export default{
     },
     getShortestPath (data) {
         return Api().post('/shortestPath', data)
+    },
+    getInvoiceByID (data) {
+        return Api().post('/customerReportByID', data)
+    },
+    getInvoices (data) {
+        return Api().post('/customerReports', data)
+    },
+    getReport (data) {
+        return Api().post('/deliveryReportByID', data)
     }
 }

@@ -102,8 +102,8 @@
     <v-card class="mx-auto px-10 py-8" max-width="85%">
       <v-row>
         <v-col cols="4"  :key="countDownTimerView">
-          <h1>{{ countDownTimerView }}</h1>
-          <p>Pick Up Route</p>
+          <h1 :v-show="showCountDown">{{ countDownTimerView }}</h1>
+          <p>Route</p>
           <p>Estimated Minutes for delivery : {{ estMin }}</p>
           <v-btn
             color="teal-accent-4"
@@ -191,6 +191,7 @@ import { LMap, LImageOverlay, LPolyline, LMarker, LCircle, LTooltip } from "@vue
       username: "",
       refreshPage: false,
       alertMsg: "",
+      showCountDown: true,
 
       deliveryID: "",
       orderTakenBy: "",
@@ -431,8 +432,10 @@ import { LMap, LImageOverlay, LPolyline, LMarker, LCircle, LTooltip } from "@vue
         if (this.countDown > 0) {
           this.isBonus = "yes"
           setTimeout(() => {
-          this.countDown -= 1
-          this.countDownTimer()
+          if (this.countDown > 0) {
+            this.countDown -= 1
+            this.countDownTimer()
+          }
           }, 1000)
         }
         else{
@@ -480,8 +483,10 @@ import { LMap, LImageOverlay, LPolyline, LMarker, LCircle, LTooltip } from "@vue
                 this.showStatusBtn = false
                 this.status = 4
                 this.backTOOfficeRouting()
-                this.loadingOverlay = false
                 this.refreshPage = !this.refreshPage
+                this.showCountDown = false
+                this.loadingOverlay = false
+                this.countDown = 0
               })
             }
         }
@@ -503,6 +508,13 @@ import { LMap, LImageOverlay, LPolyline, LMarker, LCircle, LTooltip } from "@vue
         else if(this.status == 4){
           this.backTOOfficeRouting()
         }
+      },
+      refreshAllTrips: function(){
+        this.loadingOverlay = true
+        this.getDeliveryID()
+        this.GetDeliveryDetails()
+        console.log("new date: " + new Date())
+        this.countDown = 0
       }
     },
     beforeMount() {

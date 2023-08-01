@@ -13,6 +13,8 @@
       <v-tab :value="6" v-show="this.$store.state.permission == '3'"> My Deliverys</v-tab>
       <v-tab :value="7" v-show="this.$store.state.permission == '3'"> My Dashboard</v-tab>
       <v-tab :value="8" v-show="this.$store.state.permission == '1'">Config</v-tab>
+      <v-tab :value="9" v-show="this.$store.state.permission == '1'">Customer Invoice</v-tab>
+      <v-tab :value="10" v-show="this.$store.state.permission == '1'">Courier Report</v-tab>
     </v-tabs>
     <v-window v-model="tab"> 
       <v-window-item
@@ -65,6 +67,18 @@
       >
         <AddConfig/>
       </v-window-item>
+      <v-window-item
+        :key="9"
+        :value="9"
+      >
+        <CustomersReport/>
+      </v-window-item>
+      <v-window-item
+        :key="10"
+        :value="10"
+      >
+        <CourierReport/>
+      </v-window-item>
     </v-window>
   </v-card>
 </template>
@@ -78,9 +92,12 @@ import AllCustomers from './AllCustomers.vue'
 import MyDeliverys from './MyDeliverys.vue'
 import MyProfile from './MyProfile.vue'
 import AddConfig from './AddConfig.vue'
+import CustomersReport from './CustomersReport.vue'
+import CourierReport from './CourierReport.vue'
 
   export default {
-    components: { AllCustomers, AllDeliverys, RedirectToLoginPage, AddDelivery, AllUsers, MyDeliverys, MyProfile, AddConfig},
+    components: { AllCustomers, AllDeliverys, RedirectToLoginPage, AddDelivery, AllUsers, MyDeliverys
+    , MyProfile, AddConfig, CustomersReport, CourierReport},
     data: () => ({
       tab: null,
     }),

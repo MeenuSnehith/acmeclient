@@ -16,7 +16,6 @@ const routes = [
     name: 'register',
     component: RegisterUser
   },
-  //f
   {
     path: '/login',
     name: 'login',
