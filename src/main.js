@@ -13,8 +13,8 @@ const store = createStore({
       username: "",
       permission: "",
       isUserLoggedIn: false,
-      viewDeliveryId: "",
-      editDeliveryId: ""
+      viewDeliveryId: "4000",
+      editDeliveryId: "4000"
     }
   },
   mutations: {

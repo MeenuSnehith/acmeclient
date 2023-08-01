@@ -74,6 +74,7 @@ import router from '../router'
 
     methods: {
       async getAllDeliverys(){
+        console.log("Get deliveries.")
         await DeliveryService.getAllDeliverys().then((response)=>{
             response.data.forEach(element => {
               if(this.userPerms == "3"){
@@ -99,6 +100,8 @@ import router from '../router'
     },
     beforeMount() {
       this.loadingOverlay = true
+      this.deliverys = []
+      this.userPerms = this.$store.state.permission
       this.getAllDeliverys()
     },
     watch: {
