@@ -14,8 +14,19 @@
       </v-col>
     </v-row>
     <br/>
+    <v-card class="mx-auto px-10 py-8" width="90%" height="200">
+      <v-row>
+        <v-col>
+          <p><b>User Name: </b> {{ username }}</p>
+          <p><b>Number of Deliveries:</b> {{ deliveryCount }}</p>
+          <p><b>Number of Completed Deliveries:</b> {{ completedCount }}</p>
+          <p><b>Number of Bonus from Delivery:</b> {{ bonusCount }}</p>
+        </v-col>
+      </v-row>
+    </v-card>
     <v-card class="mx-auto px-10 py-8" width="90%" height="600">
           <br/>
+          <h2>Deliveries</h2>
           <v-virtual-scroll :items="deliverys" height="600" item-height="50">
             <template v-slot:default="{ item }">
               <v-list-item>
@@ -23,18 +34,11 @@
                 <v-list-item-subtitle> {{ item.pickupCustomerName }} to {{ item.deliveryCustomerName }}</v-list-item-subtitle>
                 <v-list-item-subtitle>Pick Up: {{ item.pickupStreet }} - {{ item.pickupAvn }} &nbsp; Delivery: {{ item.deliveryStreet }} - {{ item.deliveryAvn }}</v-list-item-subtitle>
                 <template v-slot:append>
-                  <v-icon color="red-darken-4" v-show="item.status == 1"> mdi-clipboard-text </v-icon>
-                    <v-icon color="yellow-darken-4" v-show="item.status == 2"> mdi-clipboard-check </v-icon>
-                    <v-icon color="blue-darken-4" v-show="item.status == 3"> mdi-truck-delivery </v-icon>
-                    <v-icon color="green-darken-4" v-show="item.status == 4"> mdi-check-circle </v-icon>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <v-icon color="yellow-darken-4" v-show="item.isBonus == 'yes'"> mdi-star </v-icon>&nbsp;&nbsp;
+                  <v-icon color="green-darken-4" v-show="item.status == 4"> mdi-check-circle </v-icon>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   <v-btn size="small" variant="tonal" @click="openDelivery(item.id)">
-                    <v-icon color="orange-darken-4" end> mdi-open-in-new  </v-icon> &nbsp;
+                    <v-icon color="orange-darken-4" end> mdi-open-in-new </v-icon>&nbsp;
                     View
-                  </v-btn>
-                  &nbsp;
-                  <v-btn size="small" variant="tonal" @click="editDelivery(item.id)" v-show="this.$store.state.permission != '3'">
-                    <v-icon color="orange-darken-4" end> mdi-pencil </v-icon>&nbsp;
-                    Edit
                   </v-btn>
                 </template>
               </v-list-item>
@@ -69,24 +73,28 @@ import router from '../router'
       loadingOverlay: false,
       editOverlay: false,
       diableOverlay:true,
+
       lochtlOverlay: false,
       loadingMSG: "Loading...",
-      userPerms: "",
+      username: "",
 
-      deliverys: []
+      deliverys: [],
+      deliveryCount: 0,
+      bonusCount: 0,
+      completedCount: 0
     }),
 
     methods: {
       async getAllDeliverys(){
-        console.log("Get deliveries.")
-        await DeliveryService.getAllDeliverys().then((response)=>{
+        await DeliveryService.getlDeliverysByUser(this.username).then((response)=>{
             response.data.forEach(element => {
-              if(this.userPerms == "3"){
-                if(element.orderTakenBy == "" || element.orderTakenBy == null){
-                  this.deliverys.push(element)
-                }
-              }else{
-                this.deliverys.push(element)
+              this.deliverys.push(element)
+              this.deliveryCount = this.deliveryCount + 1
+              if(element.isBonus == 'yes'){
+                this.bonusCount = this.bonusCount + 1
+              }
+              if(element.status == 4){
+                this.completedCount = this.completedCount + 1
               }
             });
             this.loadingOverlay = false
@@ -95,24 +103,17 @@ import router from '../router'
       openDelivery(id){
         this.$store.commit('setviewDeliveryId', id)
         router.push("/viewdelivery")
-      },
-      editDelivery(id){
-        console.log(id)
-        this.$store.commit('seteditDeliveryId', id)
-        router.push("/updatedelivery")
       }
     },
     beforeMount() {
       this.loadingOverlay = true
-      this.deliverys = []
-      this.userPerms = this.$store.state.permission
+      this.username = this.$store.state.username
       this.getAllDeliverys()
     },
     watch: {
       refreshAllTrips: function(){
         this.loadingOverlay = true
         this.deliverys = []
-        this.userPerms = this.$store.state.permission
         this.getAllDeliverys()
       }
     }

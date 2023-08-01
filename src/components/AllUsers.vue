@@ -44,7 +44,7 @@
           <v-select
             v-model="selectRole"
             label="Select role"
-            :items="['Clerk', 'Deliveryman']"
+            :items="['Clerk', 'Courier']"
           ></v-select>
         </v-col>
         <v-col
@@ -88,7 +88,7 @@
               </v-virtual-scroll>
           </v-col>
           <v-col col="6" mb="2">
-            <h4>Delivery man</h4>
+            <h4>Courier</h4>
             <v-virtual-scroll :items="deliveryman" height="300" item-height="50">
                 <template v-slot:default="{ item }">
                   <v-list-item>
@@ -177,7 +177,7 @@ import UserAuthenticationService from '@/services/UserAuthenticationService'
             this.loadingOverlay = false
           })
         }
-        else if(this.selectRole == "Deliveryman"){
+        else if(this.selectRole == "Courier"){
           this.loadingOverlay = true
           await UserAuthenticationService.register({
             username: this.username,
